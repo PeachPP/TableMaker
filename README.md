@@ -1,7 +1,7 @@
 # TableMaker
 TableMaker using Vanilla JS
 
-## 사용법
+## How to USE : 사용법
 ```javascript
 var headerData = [
   {columnName:"col1", columnID:"col1", rowspan:"2"},
