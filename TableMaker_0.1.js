@@ -1,3 +1,7 @@
+/*
+TableMaker.js v0.1 | https://github.com/PeachPP/TableMaker | MIT license
+*/
+
 function TableMaker(TableData) {
 	TableMaker.prototype.headerDataArray = new Array();
 	TableMaker.prototype.bodyDataArray;
@@ -106,7 +110,7 @@ function TableMaker(TableData) {
 			text	+= tbody;
 			text	+= "</tbody></table>";
 		
-		document.getElementById(tableData.targetID).innerHTML = text;
+		document.getElementById(this.TableData.targetID).innerHTML = text;
 	};
 
 	fn_initialize();
