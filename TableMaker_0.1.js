@@ -9,8 +9,8 @@ function TableMaker(TableData) {
 	TableMaker.prototype.columns = new Array();
 	TableMaker.prototype.bodyText;
 
-	this.TableData = TableData;
-	this.TableID = "TMK_" + TableData.targetID;
+	TableMaker.prototype.TableData = TableData;
+	TableMaker.prototype.TableID = "TMK_" + TableData.targetID;
 	
 	const fn_makeHeader = (arr, i, depth) => {
 		if(! i) {
@@ -21,7 +21,7 @@ function TableMaker(TableData) {
 		}
 
 		if(! arr[i].length) {
-			this.headerDataArray[depth] = this.headerDataArray[depth] ? this.headerDataArray[depth] : "";
+			TableMaker.prototype.headerDataArray[depth] = TableMaker.prototype.headerDataArray[depth] ? TableMaker.prototype.headerDataArray[depth] : "";
 			
 			let childColCount = fn_getChildColsCount(arr[i]);
 
@@ -33,10 +33,11 @@ function TableMaker(TableData) {
 			let columnWidth	= arr[i].width		?	" width='"		+ arr[i].width		+ "'" : "";
 			let columnName	= arr[i].columnName;
 			let htmlTxt		= "<th" + columnID + name + styleClass + rowspan + colspan + columnWidth + ">" + columnName + "</th>";
-			this.headerDataArray[depth] += htmlTxt;
+			TableMaker.prototype.headerDataArray[depth] += htmlTxt;
 
 			if(! arr[i].childCols) {
-				this.columns.push({"columnName" : columnName, "columnID"	: arr[i].columnID});
+				let cellClass	= arr[i].cellClass || "";
+				TableMaker.prototype.columns.push({"columnName" : columnName, "columnID"	: arr[i].columnID, "cellClass"	: cellClass});
 			}
 		}
 
@@ -50,12 +51,12 @@ function TableMaker(TableData) {
 			fn_makeHeader(arr, ++i, depth);
 		}
 
-		return this.headerDataArray;
+		return TableMaker.prototype.headerDataArray;
 	};
 
 	TableMaker.prototype.getHeaderText = () => {
 		let text = "";
-		this.headerDataArray.forEach(element => {
+		TableMaker.prototype.headerDataArray.forEach(element => {
 			text += "<tr>" + element + "</tr>";
 		});
 		return text;
@@ -78,18 +79,22 @@ function TableMaker(TableData) {
 	};
 	
 	const fn_makeRowData = (bodyData) => {
-		this.bodyDataArray = new Array();
+		TableMaker.prototype.bodyDataArray = new Array();
 		let text = "";
 
 		for(let i = 0; i < bodyData.length; i++) {
 			text += "<tr>";
-				for(let j = 0; j < this.columns.length; j++) {
-					let columnID = this.columns[j].columnID;
+				for(let j = 0; j < TableMaker.prototype.columns.length; j++) {
+					let columnID = TableMaker.prototype.columns[j].columnID;
 					let value = bodyData[i][columnID];
 					let rowData = {"id": columnID, "value": value};
-					this.bodyDataArray.push(rowData);
+					TableMaker.prototype.bodyDataArray.push(rowData);
 
-					text += "<td>";
+					let cellClass = "";
+					if(TableMaker.prototype.columns[j].cellClass) {
+						cellClass = " class='" + TableMaker.prototype.columns[j].cellClass + "'";
+					}
+					text += "<td" + cellClass + ">";
 						if(value) {
 							text += value;
 						}
@@ -97,40 +102,46 @@ function TableMaker(TableData) {
 				}
 			text += "</tr>";
 		}
-		this.bodyText = text;
-		return this.bodyDataArray;
+		TableMaker.prototype.bodyText = text;
+		return TableMaker.prototype.bodyDataArray;
 	};
 
 	TableMaker.prototype.getBodyText = () => {
-		return this.bodyText;
+		return TableMaker.prototype.bodyText;
 	};
 
 	TableMaker.prototype.empty = () => {
-		let table = document.getElementById(this.TableID);
+		let table = document.getElementById(TableMaker.prototype.TableID);
 		for(let i = 0; i < table.tBodies.length; i++) {
 			table.tBodies[i].innerHTML = "";
 		}
 	};
 
+	TableMaker.prototype.setBodyData = (bodyData) => {
+		fn_makeRowData(bodyData);
+		let tbody = TableMaker.prototype.getBodyText();
+		document.getElementById(TableMaker.prototype.TableID).tBodies[0].innerHTML = "<tbody>" + tbody + "</tbody>";
+	};
+
 	const fn_initialize = () => {
-		if((! this.TableData.headerData) || (! this.TableData.bodyData)) {
+		if((! TableMaker.prototype.TableData.headerData) || (! TableMaker.prototype.TableData.bodyData)) {
 			
 		}
-		fn_makeHeader(this.TableData.headerData);
-		fn_makeRowData(this.TableData.bodyData);
+		fn_makeHeader(TableMaker.prototype.TableData.headerData);
+		fn_makeRowData(TableMaker.prototype.TableData.bodyData);
 		
-		let thead = this.getHeaderText();
-		let tbody = this.getBodyText();
+		let thead = TableMaker.prototype.getHeaderText();
+		let tbody = TableMaker.prototype.getBodyText();
 
-		let text	 = "<table id='" + this.TableID + "' class='" + (this.TableData.tableClass || "") + "'>";
-			text	+= "<thead class='" + (this.TableData.theadClass || "") + "'>";
+		let text	 = "<table id='" + TableMaker.prototype.TableID + "' class='" + (TableMaker.prototype.TableData.tableClass || "") + "'>";
+			text	+= "<thead class='" + (TableMaker.prototype.TableData.theadClass || "") + "'>";
 			text	+= thead;
 			text	+= "</thead>";
 			text	+= "<tbody>";
 			text	+= tbody;
 			text	+= "</tbody></table>";
 		
-		document.getElementById(this.TableData.targetID).innerHTML = text;
+		document.getElementById(TableMaker.prototype.TableData.targetID).innerHTML = text;
 	};
 
 	fn_initialize();
