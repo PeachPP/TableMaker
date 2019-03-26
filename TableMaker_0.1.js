@@ -65,14 +65,21 @@ function TableMaker(TableData) {
 	const fn_getChildColsCount = (obj) => {
 		let count = 0;
 		
-		let children = obj.childCols || "";
-		if(! children)
-			return 1;
-		else {
-			count += children.length;
-			for(let i = 0; i < children.length; i++) {
-				if(children[i].childCols)
-					count += fn_getChildColsCount(children[i].childCols);
+		if(Array.isArray(obj)){
+			count--;
+			for(let i = 0; i < obj.length; i++) {
+				count += fn_getChildColsCount(obj[i]);
+			}
+		} else {
+			let children = obj.childCols || "";
+			if(! children)
+				return 1;
+			else {
+				count += children.length;
+				for(let i = 0; i < children.length; i++) {
+					if(children[i].childCols)
+						count += fn_getChildColsCount(children[i].childCols);
+				}
 			}
 		}
 		return count;
