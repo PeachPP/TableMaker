@@ -11,7 +11,8 @@ function TableMaker(TableData) {
 
 	TableMaker.prototype.TableData = TableData;
 	TableMaker.prototype.TableID = "TMK_" + TableData.targetID;
-	
+	TableMaker.prototype.fixedHeader = TableData.fixedHeader || false;
+
 	const fn_makeHeader = (arr, i, depth) => {
 		if(! i) {
 			i = 0;
@@ -22,7 +23,7 @@ function TableMaker(TableData) {
 
 		if(! arr[i].length) {
 			TableMaker.prototype.headerDataArray[depth] = TableMaker.prototype.headerDataArray[depth] ? TableMaker.prototype.headerDataArray[depth] : "";
-			
+
 			let childColCount = fn_getChildColsCount(arr[i]);
 
 			let rowspan		= arr[i].rowspan	?	" rowspan='"	+ arr[i].rowspan	+ "'" : "";
@@ -32,18 +33,19 @@ function TableMaker(TableData) {
 			let columnID	= arr[i].columnID	?	" id='"			+ arr[i].columnID	+ "'" : "";
 			let columnWidth	= arr[i].width		?	" width='"		+ arr[i].width		+ "'" : "";
 			let columnName	= arr[i].columnName;
+			let cellWidth	= arr[i].width || "";
 			let htmlTxt		= "<th" + columnID + name + styleClass + rowspan + colspan + columnWidth + ">" + columnName + "</th>";
 			TableMaker.prototype.headerDataArray[depth] += htmlTxt;
 
 			if(! arr[i].childCols) {
 				let cellClass	= arr[i].cellClass || "";
-				TableMaker.prototype.columns.push({"columnName" : columnName, "columnID"	: arr[i].columnID, "cellClass"	: cellClass});
+				TableMaker.prototype.columns.push({"columnName" : columnName, "columnID"	: arr[i].columnID, "cellClass"	: cellClass, "cellWidth": cellWidth});
 			}
 		}
 
 		if(arr[i].childCols) {
 			fn_makeHeader(arr[i].childCols, 0, ++depth);
-			
+
 			depth--;
 		}
 
@@ -64,7 +66,7 @@ function TableMaker(TableData) {
 
 	const fn_getChildColsCount = (obj) => {
 		let count = 0;
-		
+
 		if(Array.isArray(obj)){
 			count--;
 			for(let i = 0; i < obj.length; i++) {
@@ -84,7 +86,7 @@ function TableMaker(TableData) {
 		}
 		return count;
 	};
-	
+
 	const fn_makeRowData = (bodyData) => {
 		TableMaker.prototype.bodyDataArray = new Array();
 		let text = "";
@@ -98,10 +100,14 @@ function TableMaker(TableData) {
 					TableMaker.prototype.bodyDataArray.push(rowData);
 
 					let cellClass = "";
+					let cellWidth = "";
 					if(TableMaker.prototype.columns[j].cellClass) {
 						cellClass = " class='" + TableMaker.prototype.columns[j].cellClass + "'";
 					}
-					text += "<td" + cellClass + ">";
+					if (TableMaker.prototype.columns[j].cellWidth) {
+						cellWidth = " width='" + TableMaker.prototype.columns[j].cellWidth + "'";
+					}
+					text += "<td" + cellClass + cellWidth + ">";
 						if(value) {
 							text += value;
 						}
@@ -132,22 +138,49 @@ function TableMaker(TableData) {
 
 	const fn_initialize = () => {
 		if((! TableMaker.prototype.TableData.headerData) || (! TableMaker.prototype.TableData.bodyData)) {
-			
+
 		}
 		fn_makeHeader(TableMaker.prototype.TableData.headerData);
 		fn_makeRowData(TableMaker.prototype.TableData.bodyData);
-		
+
 		let thead = TableMaker.prototype.getHeaderText();
 		let tbody = TableMaker.prototype.getBodyText();
 
-		let text	 = "<table id='" + TableMaker.prototype.TableID + "' class='" + (TableMaker.prototype.TableData.tableClass || "") + "'>";
-			text	+= "<thead class='" + (TableMaker.prototype.TableData.theadClass || "") + "'>";
-			text	+= thead;
-			text	+= "</thead>";
-			text	+= "<tbody>";
-			text	+= tbody;
-			text	+= "</tbody></table>";
-		
+		let text;
+		if(TableMaker.prototype.fixedHeader) {
+			let bodyHeight = TableMaker.prototype.TableData.bodyHeight || "";
+			if(bodyHeight)
+				bodyHeight = " height:" + bodyHeight + "px;";
+
+			let tableHeader = "<table id='" + TableMaker.prototype.TableID + "_header' class='" + (TableMaker.prototype.TableData.tableClass || "") + "'>";
+				tableHeader += "<thead class='" + (TableMaker.prototype.TableData.theadClass || "") + "'>";
+				tableHeader += thead;
+				tableHeader += "</thead></table>";
+			let tableBody = "<table id='" + TableMaker.prototype.TableID + "' class='" + (TableMaker.prototype.TableData.tableClass || "") + "'>";
+				tableBody += "<tbody>";
+				tableBody += tbody;
+				tableBody += "</tbody></table>";
+
+			text = "<div style='overflow:auto;' id='TMK_WRAP_" + TableMaker.prototype.TableID + "' style='width:100%;'>";
+			text += tableHeader;
+			text += "<div style='overflow-x:hidden; overflow-y:auto;" + bodyHeight + "' id='TMK_BODY_WRAP_" + TableMaker.prototype.TableID + "'>";
+			text += tableBody;
+			text += "</div></div>";
+		} else {
+			text = "<table id='" + TableMaker.prototype.TableID + "' class='" + (TableMaker.prototype.TableData.tableClass || "") + "'>";
+			text += "<thead class='" + (TableMaker.prototype.TableData.theadClass || "") + "'>";
+			text += thead;
+			text += "</thead>";
+			text += "<tbody>";
+			text += tbody;
+			text += "</tbody></table>";
+		}
+		let insertTarget = document.getElementById(TableMaker.prototype.TableData.targetID);
+		if(insertTarget)
+			insertTarget.innerHTML = text;
+		else
+			console.log("%cTABLEMAKER : TARGET IS NULL!", "color:#FF3333;");
+
 		document.getElementById(TableMaker.prototype.TableData.targetID).innerHTML = text;
 	};
 
