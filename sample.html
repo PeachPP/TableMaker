@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>sample</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script src='TableMakerV.js'></script>
+    <script>
+        var tm;
+        var tm2;
+        window.onload = function() {
+            let options = {
+                data : [
+                    {"1" : "1", "2" : "2"}
+                    ,{"3" : "3", "4" : "4"}
+                ],
+                targetID:"target"
+            };
+            tm = new TableMakerV(options);
+            let options2 = {
+                colgroup : "<colgroup><col width='40%'><col width='60%'></colgroup>",
+                data : {
+                    "r1" : "1!",
+                    "r2" : "2@"
+                },
+                thData : [
+                    {header:"r1", label:"row1"},
+                    {header:"r2", label:"row2"},
+                    {header:"r3", label:"row3"},
+                ],
+                targetID:"target2"
+            };
+            tm2 = new TableMakerV(options2);
+        };
+        
+
+    </script>
+</head>
+<body>
+    <div id="target"></div>
+    <div id="target2"></div>
+</body>
+</html>
